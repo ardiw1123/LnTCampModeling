@@ -25,9 +25,7 @@ REG_REPO = os.getenv("REG_REPO", "ardiiw/regression_superstore")
 CLF_REPO = os.getenv("CLF_REPO", REG_REPO)
 
 
-# ============================================================
 # MODEL LOADING
-# ============================================================
 
 def get_model_path(filename: str, repo_id: str) -> str:
     local = os.path.join(BASE, "models", filename)
@@ -72,9 +70,7 @@ def try_load():
 clf_art, clf_error, reg_art, reg_error = try_load()
 
 
-# ============================================================
 # FASTAPI
-# ============================================================
 
 ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",")]
 
@@ -88,9 +84,7 @@ app.add_middleware(
 )
 
 
-# ============================================================
 # REQUEST / RESPONSE SCHEMAS
-# ============================================================
 
 class RegressionInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -138,9 +132,7 @@ class ClassificationResponse(BaseModel):
     message: str
 
 
-# ============================================================
 # ERROR HANDLING
-# ============================================================
 
 def model_unavailable():
     return HTTPException(status_code=503, detail={"code": "model_unavailable", "message": "Prediction models are not ready"})
@@ -155,9 +147,7 @@ async def http_error_handler(request: Request, exc: HTTPException):
     return JSONResponse(status_code=exc.status_code, content={"error": detail})
 
 
-# ============================================================
 # HEALTH & META
-# ============================================================
 
 @app.get("/health")
 def health():
@@ -185,9 +175,7 @@ def meta():
     }
 
 
-# ============================================================
 # PREDICTION
-# ============================================================
 
 @app.post("/api/predict/regression", response_model=RegressionResponse)
 def predict_regression(req: RegressionInput):
