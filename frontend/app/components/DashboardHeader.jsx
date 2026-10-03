@@ -31,7 +31,7 @@ export default function DashboardHeader({
       <div className="flex items-center justify-between sm:block">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Welcome back, Jack!
+            Welcome back!
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             51,290 historical items across 147 global markets.
@@ -80,7 +80,7 @@ export default function DashboardHeader({
                       FastAPI Analytics Connected
                     </p>
                     <p className="text-[10px] text-zinc-500">
-                      Port 8001 • SQLite database verified
+                      FastAPI service • SQLite database verified
                     </p>
                   </div>
                 </div>

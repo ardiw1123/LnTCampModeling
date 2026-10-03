@@ -86,13 +86,29 @@ export default function Home() {
   // Fetch dashboard summary data based on current filters
   const loadDashboard = useCallback(
     async (isManualRefresh = false) => {
-      if (isManualRefresh) setIsRefreshing(true);
-      else setIsLoading(true);
-      setError(null);
+      if (isManualRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+        setError(null);
+      }
 
       try {
         const data = await getDashboardSummary(filters);
         setDashboardData(data);
+        setError(null);
+
+        // Recover dateBounds or countries if initial fetch failed during service outage
+        if (data?.date_bounds && !dateBounds) {
+          setDateBounds(data.date_bounds);
+        }
+        if (countries.length === 0) {
+          getCountries()
+            .then((list) => {
+              if (list?.length) setCountries(list);
+            })
+            .catch(() => {});
+        }
       } catch (err) {
         setError(err.message || "Failed to load analytics dashboard data.");
       } finally {
@@ -100,7 +116,7 @@ export default function Home() {
         setIsRefreshing(false);
       }
     },
-    [filters]
+    [filters, dateBounds, countries.length]
   );
 
   useEffect(() => {
@@ -236,7 +252,11 @@ export default function Home() {
           {/* Error / Empty / Dynamic Content */}
           <div className="flex-1 mt-4">
             {error ? (
-              <ErrorState message={error} onRetry={() => loadDashboard(true)} />
+              <ErrorState
+                message={error}
+                onRetry={() => loadDashboard(true)}
+                isRetrying={isRefreshing}
+              />
             ) : isZeroResults ? (
               <EmptyState onReset={handleResetFilters} />
             ) : (

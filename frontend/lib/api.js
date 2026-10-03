@@ -28,13 +28,25 @@ export function buildQueryString(params = {}) {
   return query ? `?${query}` : "";
 }
 
+function isLocalHost() {
+  if (typeof window === "undefined") {
+    return process.env.NODE_ENV === "development";
+  }
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host.endsWith(".local");
+}
+
 /**
  * Fetch wrapper with error extraction and URL fallback
  */
 async function fetchAnalytics(endpoint, queryParams = {}) {
   const query = buildQueryString(queryParams);
   const primaryUrl = `/analytics-api${endpoint}${query}`;
-  const directUrl = `${ANALYTICS_BASE_URL}/api${endpoint}${query}`;
+  const directBase = ANALYTICS_BASE_URL.replace(/\/+$/, "").replace(/\/api$/, "");
+  const directUrl = `${directBase}/api${endpoint}${query}`;
+
+  const isLocal = isLocalHost();
+  const hasCustomUrl = Boolean(process.env.NEXT_PUBLIC_ANALYTICS_API_URL);
 
   let res;
   try {
@@ -43,20 +55,41 @@ async function fetchAnalytics(endpoint, queryParams = {}) {
       headers: { Accept: "application/json" },
       cache: "no-store",
     });
-  } catch {
-    // Fall back to direct backend URL if proxy fails (e.g. static export)
-    try {
-      res = await fetch(directUrl, {
-        headers: { Accept: "application/json" },
-        cache: "no-store",
-      });
-    } catch (err) {
-      throw new Error(`Unable to connect to Analytics Service at ${ANALYTICS_BASE_URL}. Ensure uvicorn is running.`);
+  } catch (primaryErr) {
+    // Only fall back to direct backend URL if custom URL is configured or running locally
+    if (hasCustomUrl || isLocal) {
+      try {
+        res = await fetch(directUrl, {
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+      } catch (directErr) {
+        if (isLocal) {
+          const localErr = new Error(
+            `Unable to connect to local Analytics Service at ${ANALYTICS_BASE_URL}. Ensure uvicorn is running.`
+          );
+          localErr.isLocalServiceError = true;
+          throw localErr;
+        }
+        throw new Error(
+          `Unable to connect to Analytics Service at ${ANALYTICS_BASE_URL}. Please check your connection.`
+        );
+      }
+    } else {
+      // Deployed visitor without custom URL: show clean, accurate connection error
+      throw new Error(
+        "Unable to reach the Analytics Service. The service may be temporarily unavailable or restarting."
+      );
     }
   }
 
-  // If primary returned 404 or 502/504 proxy error, attempt directUrl once
-  if ((!res.ok && (res.status === 404 || res.status === 502 || res.status === 504)) && typeof window !== "undefined") {
+  // If primary returned 404 or 502/504 proxy error, attempt directUrl once ONLY if local or custom URL
+  if (
+    !res.ok &&
+    (res.status === 404 || res.status === 502 || res.status === 504) &&
+    typeof window !== "undefined" &&
+    (hasCustomUrl || isLocal)
+  ) {
     try {
       const fallbackRes = await fetch(directUrl, {
         headers: { Accept: "application/json" },
@@ -74,12 +107,18 @@ async function fetchAnalytics(endpoint, queryParams = {}) {
     let errorDetail = `Request failed with status ${res.status}`;
     try {
       const data = await res.json();
-      if (data?.detail) errorDetail = data.detail;
-      else if (data?.message) errorDetail = data.message;
+      if (data?.detail) {
+        if (typeof data.detail === "string") errorDetail = data.detail;
+        else if (data.detail?.message) errorDetail = data.detail.message;
+      } else if (data?.message) {
+        errorDetail = data.message;
+      }
     } catch {
       // Ignore JSON parse error on non-JSON response
     }
-    throw new Error(errorDetail);
+    const error = new Error(errorDetail);
+    error.status = res.status;
+    throw error;
   }
 
   return await res.json();
@@ -206,7 +245,13 @@ const PREDICTION_BASE_URL =
 
 async function fetchPrediction(endpoint, { method = "GET", body } = {}) {
   const primaryUrl = `/prediction-api${endpoint}`;
-  const directUrl = `${PREDICTION_BASE_URL}${endpoint}`;
+  const directBase = PREDICTION_BASE_URL.replace(/\/+$/, "");
+  const directUrl = `${directBase}${endpoint}`;
+
+  const isLocal = isLocalHost();
+  const hasCustomUrl = Boolean(
+    process.env.NEXT_PUBLIC_PREDICTION_API_URL || process.env.NEXT_PUBLIC_API_URL
+  );
 
   const options = {
     method,
@@ -223,12 +268,23 @@ async function fetchPrediction(endpoint, { method = "GET", body } = {}) {
     // Try relative route first (works with Next.js rewrites)
     res = await fetch(primaryUrl, options);
   } catch {
-    // Fall back to direct backend URL if proxy fails
-    try {
-      res = await fetch(directUrl, options);
-    } catch {
+    // Fall back to direct backend URL if proxy fails, only if custom URL or local
+    if (hasCustomUrl || isLocal) {
+      try {
+        res = await fetch(directUrl, options);
+      } catch {
+        if (isLocal) {
+          throw new Error(
+            `Unable to connect to Prediction Service at ${PREDICTION_BASE_URL}. Ensure FastAPI is running.`
+          );
+        }
+        throw new Error(
+          `Unable to connect to Prediction Service at ${PREDICTION_BASE_URL}. Please check your connection.`
+        );
+      }
+    } else {
       throw new Error(
-        `Unable to connect to Prediction Service at ${PREDICTION_BASE_URL}. Ensure FastAPI is running.`
+        "Unable to reach the Prediction Service. The service may be temporarily unavailable."
       );
     }
   }
@@ -237,7 +293,8 @@ async function fetchPrediction(endpoint, { method = "GET", body } = {}) {
   if (
     !res.ok &&
     (res.status === 404 || res.status === 502 || res.status === 504) &&
-    typeof window !== "undefined"
+    typeof window !== "undefined" &&
+    (hasCustomUrl || isLocal)
   ) {
     try {
       const fallbackRes = await fetch(directUrl, options);

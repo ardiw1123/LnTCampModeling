@@ -77,6 +77,11 @@ DB_PATH = _resolve_db_path()
 @contextmanager
 def _get_conn():
     """Yield a read-only SQLite connection with row-factory."""
+    if not os.path.isfile(DB_PATH):
+        raise HTTPException(
+            status_code=503,
+            detail="Database unavailable",
+        )
     uri = f"file:{DB_PATH}?mode=ro"
     conn = sqlite3.connect(uri, uri=True)
     conn.row_factory = sqlite3.Row
