@@ -431,11 +431,11 @@ export default function PredictionView() {
                   Superstore AI Prediction Center
                 </h1>
                 <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#7C69EF]/10 text-[#7C69EF] dark:bg-[#7C69EF]/20">
-                  XGBoost model
+                  XGBoost
                 </span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                Execute local machine learning inference for item profit regression and multi-item late delivery classification.
+                Execute machine learning inference for item profit regression and multi-item late delivery classification.
               </p>
             </div>
           </div>
@@ -1451,7 +1451,7 @@ export default function PredictionView() {
             )}
 
             <div className="pt-4 border-t border-purple-100/60 dark:border-purple-950/30 text-[11px] text-zinc-400 text-center">
-              Powered by local XGBoost models in <code className="text-[#7C69EF]">backend/models</code>
+              Powered by local XGBoost models
             </div>
           </div>
         </div>

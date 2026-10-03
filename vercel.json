@@ -1,0 +1,41 @@
+ {
+      "$schema": "https://openapi.vercel.sh/vercel.json",
+      "services": {
+        "analytics": {
+          "root": "analytics",
+          "framework": "fastapi"
+        },
+        "backend": {
+          "root": "backend",
+          "framework": "fastapi"
+        },
+        "frontend": {
+          "root": "frontend",
+          "framework": "nextjs",
+          "bindings": [
+            { "type": "service", "service": "analytics", "format": "url", "env": "ANALYTICS_URL" },
+            { "type": "service", "service": "backend", "format": "url", "env": "BACKEND_URL" }
+          ]
+        }
+      },
+      "rewrites": [
+        {
+          "source": "/analytics-api/(.*)",
+          "destination": {
+            "service": "analytics"
+          }
+        },
+        {
+          "source": "/prediction-api/(.*)",
+          "destination": {
+            "service": "backend"
+          }
+        },
+        {
+          "source": "/(.*)",
+          "destination": {
+            "service": "frontend"
+          }
+        }
+      ]
+    }
