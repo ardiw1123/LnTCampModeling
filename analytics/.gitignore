@@ -2,5 +2,3 @@ __pycache__/
 .pytest_cache/
 *.pyc
 *.pyo
-# Build-time copy of the SQLite database (created by build_data.py)
-data/
