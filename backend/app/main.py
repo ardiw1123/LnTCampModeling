@@ -21,23 +21,19 @@ from pydantic import BaseModel, ConfigDict, Field
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-REG_REPO = os.getenv("REG_REPO", "ardiiw/regression_superstore")
-CLF_REPO = os.getenv("CLF_REPO", REG_REPO)
+# REG_REPO = os.getenv("REG_REPO", "ardiiw/regression_superstore")
+# CLF_REPO = os.getenv("CLF_REPO", REG_REPO)
 
 
 # MODEL LOADING
 
-def get_model_path(filename: str, repo_id: str) -> str:
-    local = os.path.join(BASE, "models", filename)
-    if os.path.exists(local):
-        return local
-    from huggingface_hub import hf_hub_download
-    return hf_hub_download(repo_id=repo_id, filename=filename, token=os.getenv("HF_TOKEN"))
+def get_model_path(filename: str) -> str:
+    return os.path.join(BASE, "models", filename)
 
 
 def load_classifier():
-    model_path = get_model_path("xgb_late_classifier.json", CLF_REPO)
-    meta_path = get_model_path("xgb_late_classifier_meta.pkl", CLF_REPO)
+    model_path = get_model_path("xgb_late_classifier.json")
+    meta_path = get_model_path("xgb_late_classifier_meta.pkl")
     
     model = XGBClassifier()
     model.load_model(model_path)
@@ -46,8 +42,8 @@ def load_classifier():
 
 
 def load_regressor():
-    model_path = get_model_path("xgb_profit_regressor.json", REG_REPO)
-    meta_path = get_model_path("xgb_profit_regressor_meta.pkl", REG_REPO)
+    model_path = get_model_path("xgb_profit_regressor.json")
+    meta_path = get_model_path("xgb_profit_regressor_meta.pkl")
     
     model = XGBRegressor()
     model.load_model(model_path)
