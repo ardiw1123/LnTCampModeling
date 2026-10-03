@@ -14,7 +14,7 @@ from contextlib import contextmanager
 from datetime import date, datetime
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -31,6 +31,22 @@ app = FastAPI(
         "and country choices backed by data/superstore.sqlite."
     ),
 )
+
+@app.middleware("http")
+async def rewrite_analytics_path(request: Request, call_next):
+    path = request.scope["path"]
+
+    if path == "/analytics-api":
+        new_path = "/"
+    elif path.startswith("/analytics-api/"):
+        new_path = "/api" + path[len("/analytics-api"):]
+    else:
+        new_path = path
+
+    request.scope["path"] = new_path
+    request.scope["raw_path"] = new_path.encode()
+
+    return await call_next(request)
 
 ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",")]
 
