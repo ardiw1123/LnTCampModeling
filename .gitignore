@@ -1,0 +1,110 @@
+# ==============================================================================
+# Gitignore for LnT Camp Monorepo (FastAPI Backend, Analytics, Next.js Frontend)
+# ==============================================================================
+
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.python-version-local
+
+# Unit Test & Coverage Caches
+.pytest_cache/
+*/.pytest_cache/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Virtual Environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution & Build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Node.js & Next.js Frontend
+node_modules/
+*/node_modules/
+.next/
+*/.next/
+out/
+*/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Node / Package Manager Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.pnp
+.pnp.*
+
+# Vercel / Deployment
+.vercel/
+
+# Environment Variables & Secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+ehthumbs_vista.db
+Thumbs.db
+Desktop.ini
+
+# Editors & IDEs
+.idea/
+.opencode/
+*.swp
+*.swo
+*~
+
+# Multica Runtime & Agent Scratch / Local Verification
+.multica/
+scratch/
+attachments/
+*.tmp
+*.temp
+
+# SQLite Temporary / Lock Files
+# (Preserves permanent data fixtures like data/superstore.sqlite)
+*.db-journal
+*.sqlite-journal
+*.sqlite3-journal
+*.db-wal
+*.sqlite-wal
+*.sqlite3-wal
+*.db-shm
+*.sqlite-shm
+*.sqlite3-shm
+*.sqlite-temp
+test.db
+temp.db

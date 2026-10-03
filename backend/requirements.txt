@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic>=2
+pandas
+numpy
+joblib
+huggingface_hub
+# The supplied pickle streams load with XGBoost 3.0.2. The artifacts' declared
+# 3.4.1 metadata was tested but fails with "input stream corrupted".
+scikit-learn==1.6.1
+xgboost==3.0.2
