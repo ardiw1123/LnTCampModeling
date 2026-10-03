@@ -1,0 +1,8 @@
+__pycache__/
+.pytest_cache/
+tests/
+*.pyc
+*.pyo
+.git/
+.gitignore
+build_data.py

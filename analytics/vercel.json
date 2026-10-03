@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "buildCommand": "pip install -r requirements.txt && python build_data.py",
+  "functions": {
+    "app.py": {
+      "memory": 512,
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/app.py" }
+  ]
+}

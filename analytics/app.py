@@ -32,9 +32,11 @@ app = FastAPI(
     ),
 )
 
+ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,11 +46,32 @@ app.add_middleware(
 # Database helpers (read-only, no WAL writes)
 # ---------------------------------------------------------------------------
 
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "data",
-    "superstore.sqlite",
-)
+def _resolve_db_path() -> str:
+    """Locate superstore.sqlite for both local dev and Vercel deployment.
+
+    Search order:
+    1. DB_PATH env var (explicit override)
+    2. data/superstore.sqlite next to this file (Vercel build copies it here)
+    3. ../data/superstore.sqlite (local dev layout where data/ is a sibling)
+    """
+    env_path = os.getenv("DB_PATH")
+    if env_path and os.path.isfile(env_path):
+        return env_path
+
+    here = os.path.dirname(os.path.abspath(__file__))
+
+    local_copy = os.path.join(here, "data", "superstore.sqlite")
+    if os.path.isfile(local_copy):
+        return local_copy
+
+    sibling = os.path.join(os.path.dirname(here), "data", "superstore.sqlite")
+    if os.path.isfile(sibling):
+        return sibling
+
+    return sibling
+
+
+DB_PATH = _resolve_db_path()
 
 
 @contextmanager
@@ -312,8 +335,25 @@ class PaginatedLocations(BaseModel):
 
 @app.get("/", tags=["health"])
 def health_check():
-    """Health check."""
-    return {"status": "ok", "service": "Superstore Analytics API (read-only)"}
+    """Health check with database connectivity verification."""
+    db_ok = False
+    try:
+        with _get_conn() as conn:
+            conn.execute("SELECT 1")
+            db_ok = True
+    except Exception:
+        pass
+
+    status = "ok" if db_ok else "degraded"
+    result: dict[str, Any] = {
+        "status": status,
+        "service": "Superstore Analytics API (read-only)",
+        "database": db_ok,
+    }
+    if not db_ok:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=503, content=result)
+    return result
 
 
 @app.get("/api/date-bounds", response_model=DateBounds, tags=["meta"])
