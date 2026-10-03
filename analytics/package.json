@@ -1,1 +1,5 @@
-﻿{"scripts": {"vercel-build": "python build_data.py"}}
+﻿{
+    "scripts": 
+        {"vercel-build": "python build_data.py"
+    }
+}
