@@ -638,10 +638,12 @@ export default function LocationStatsCard({
                   const cfg = SHIP_MODE_CONFIG[modeName] || { color: "#7C69EF", bg: "bg-purple-500" };
                   const item = shipModes.find((sm) => sm.ship_mode === modeName) || {
                     ship_mode: modeName,
+                    order_count: 0,
                     orders: 0,
                     shipping_cost: 0,
                   };
-                  const pct = totalOrders > 0 ? (item.orders / totalOrders) * 100 : 0;
+                  const orderCount = item.order_count ?? item.orders ?? 0;
+                  const pct = totalOrders > 0 ? (orderCount / totalOrders) * 100 : 0;
 
                   return (
                     <div key={modeName} className="space-y-1">
@@ -655,7 +657,7 @@ export default function LocationStatsCard({
                         </div>
                         <div className="text-zinc-500 dark:text-zinc-400 text-[10px]">
                           <strong className="text-zinc-800 dark:text-zinc-200">
-                            {formatNumber(item.orders)} orders
+                            {formatNumber(orderCount)} orders
                           </strong>{" "}
                           ({pct.toFixed(1)}%) &middot; {formatCurrency(item.shipping_cost, true)} ship
                         </div>

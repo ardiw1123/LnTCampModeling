@@ -34,7 +34,7 @@ export default function DashboardHeader({
             Welcome back, Jack!
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            51,290 historical orders across 147 global markets.
+            51,290 historical items across 147 global markets.
           </p>
         </div>
 

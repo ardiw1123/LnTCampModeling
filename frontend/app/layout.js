@@ -43,7 +43,10 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#ECEAF8] text-zinc-900 dark:bg-[#0E0D18] dark:text-zinc-100 transition-colors duration-200">
+      <body
+        className="min-h-full flex flex-col bg-[#ECEAF8] text-zinc-900 dark:bg-[#0E0D18] dark:text-zinc-100 transition-colors duration-200"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

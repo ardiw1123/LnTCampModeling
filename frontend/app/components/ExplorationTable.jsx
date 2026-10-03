@@ -263,8 +263,8 @@ export default function ExplorationTable({ filters, initialSearch = "" }) {
             </thead>
             <tbody className="divide-y divide-purple-50 dark:divide-purple-950/20">
               {resource === "orders" &&
-                result.data.map((row) => (
-                  <tr key={`${row.order_id_raw}-${row.product_name}`} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
+                result.data.map((row, idx) => (
+                  <tr key={row.row_id ? `order-${row.row_id}` : `order-${row.order_id_raw}-${row.product_name}-${idx}`} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
                     <td className="px-4 py-3 font-mono font-medium text-purple-600 dark:text-purple-400">
                       {row.order_id_raw}
                     </td>
@@ -315,8 +315,8 @@ export default function ExplorationTable({ filters, initialSearch = "" }) {
                 ))}
 
               {resource === "products" &&
-                result.data.map((row) => (
-                  <tr key={row.product_name} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
+                result.data.map((row, idx) => (
+                  <tr key={row.product_id ? `prod-${row.product_id}` : `prod-${row.product_name}-${idx}`} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
                     <td className="px-4 py-3 font-mono text-purple-600 dark:text-purple-400">
                       {row.product_id}
                     </td>
@@ -342,8 +342,8 @@ export default function ExplorationTable({ filters, initialSearch = "" }) {
                 ))}
 
               {resource === "customers" &&
-                result.data.map((row) => (
-                  <tr key={row.customer_name} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
+                result.data.map((row, idx) => (
+                  <tr key={row.customer_id ? `cust-${row.customer_id}` : `cust-${row.customer_name}-${idx}`} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
                     <td className="px-4 py-3 font-mono text-purple-600 dark:text-purple-400">
                       {row.customer_id}
                     </td>
@@ -371,8 +371,8 @@ export default function ExplorationTable({ filters, initialSearch = "" }) {
                 ))}
 
               {resource === "locations" &&
-                result.data.map((row) => (
-                  <tr key={row.location_id} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
+                result.data.map((row, idx) => (
+                  <tr key={row.location_id ? `loc-${row.location_id}` : `loc-${row.city}-${row.country}-${idx}`} className="hover:bg-purple-50/40 dark:hover:bg-purple-950/20 transition-colors">
                     <td className="px-4 py-3 font-semibold text-zinc-900 dark:text-white">{row.city}</td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{row.state}</td>
                     <td className="px-4 py-3 text-zinc-800 dark:text-zinc-200 font-medium">{row.country}</td>

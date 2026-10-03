@@ -209,6 +209,7 @@ class ShipModeStats(BaseModel):
     total_sales: float
     avg_order_value: float
     avg_shipping_days: float
+    shipping_cost: float = 0.0
 
 
 class SegmentStats(BaseModel):
@@ -521,14 +522,15 @@ def orders_by_shipmode(
     """Order counts, sales, and average shipping days by ship mode."""
     f = _Filters(date_start, date_end, country)
     where, params = f.where_clause()
-    return _query(
+    rows = _query(
         f"""
         SELECT
             o.ship_mode,
             COUNT(DISTINCT o.order_key)                                       AS order_count,
             ROUND(SUM(oi.sales), 2)                                           AS total_sales,
             ROUND(SUM(oi.sales) / NULLIF(COUNT(DISTINCT o.order_key), 0), 2)  AS avg_order_value,
-            ROUND(AVG(JULIANDAY(o.ship_date) - JULIANDAY(o.order_date)), 1)   AS avg_shipping_days
+            ROUND(AVG(JULIANDAY(o.ship_date) - JULIANDAY(o.order_date)), 1)   AS avg_shipping_days,
+            ROUND(COALESCE(SUM(oi.shipping_cost), 0), 2)                     AS shipping_cost
         FROM order_items oi
         JOIN orders o ON oi.order_key = o.order_key
         JOIN dim_locations l ON o.location_id = l.location_id
@@ -538,6 +540,27 @@ def orders_by_shipmode(
         """,
         tuple(params),
     )
+
+    all_modes = ["Standard Class", "Second Class", "First Class", "Same Day"]
+    mode_dict = {row["ship_mode"]: row for row in rows}
+    
+    result = []
+    for mode in all_modes:
+        if mode in mode_dict:
+            result.append(mode_dict[mode])
+        else:
+            result.append({
+                "ship_mode": mode,
+                "order_count": 0,
+                "total_sales": 0.0,
+                "avg_order_value": 0.0,
+                "avg_shipping_days": 0.0,
+                "shipping_cost": 0.0,
+            })
+            
+    # Sort by order_count descending
+    result.sort(key=lambda x: x["order_count"], reverse=True)
+    return result
 
 
 @app.get("/api/orders-by-priority", response_model=list[PriorityStats], tags=["analytics"])
@@ -549,7 +572,7 @@ def orders_by_priority(
     """Order counts, sales, and average shipping days by order priority."""
     f = _Filters(date_start, date_end, country)
     where, params = f.where_clause()
-    return _query(
+    rows = _query(
         f"""
         SELECT
             o.order_priority,
@@ -565,6 +588,25 @@ def orders_by_priority(
         """,
         tuple(params),
     )
+
+    all_priorities = ["Critical", "High", "Medium", "Low"]
+    priority_dict = {row["order_priority"]: row for row in rows}
+    
+    result = []
+    for p in all_priorities:
+        if p in priority_dict:
+            result.append(priority_dict[p])
+        else:
+            result.append({
+                "order_priority": p,
+                "order_count": 0,
+                "total_sales": 0.0,
+                "avg_shipping_days": 0.0,
+            })
+            
+    # Sort by order_count descending
+    result.sort(key=lambda x: x["order_count"], reverse=True)
+    return result
 
 
 @app.get("/api/segment-stats", response_model=list[SegmentStats], tags=["analytics"])
@@ -849,6 +891,7 @@ def list_orders(
     data = _query(
         f"""
         SELECT
+            oi.row_id,
             o.order_id_raw,
             c.customer_name,
             c.segment,

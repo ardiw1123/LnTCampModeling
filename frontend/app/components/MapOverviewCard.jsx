@@ -15,8 +15,8 @@ export default function MapOverviewCard({
   selectedLocation,
   onSelectLocation,
 }) {
-  const [svgText, setSvgText] = useState(getCachedWorldMapSvg);
-  const [isLoadingSvg, setIsLoadingSvg] = useState(!getCachedWorldMapSvg());
+  const [svgText, setSvgText] = useState(null);
+  const [isLoadingSvg, setIsLoadingSvg] = useState(true);
   const [svgError, setSvgError] = useState(null);
   const [isZoomed, setIsZoomed] = useState(false);
 
@@ -39,6 +39,13 @@ export default function MapOverviewCard({
   // Load World Map SVG asset
   useEffect(() => {
     let isMounted = true;
+
+    const cached = getCachedWorldMapSvg();
+    if (cached) {
+      setSvgText(cached);
+      setIsLoadingSvg(false);
+      return;
+    }
 
     fetchWorldMapSvg()
       .then((text) => {
@@ -405,6 +412,7 @@ export default function MapOverviewCard({
         <div
           ref={mapWrapRef}
           className="dashboard-map-wrap"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={svgText ? { __html: svgText } : undefined}
         />
 

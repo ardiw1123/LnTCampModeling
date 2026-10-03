@@ -23,10 +23,10 @@ export default function ProfitMarginGaugeCard({ kpi, isLoading }) {
     const rad = (angle * Math.PI) / 180;
     const r1 = 62;
     const r2 = 72;
-    const x1 = 100 + r1 * Math.cos(rad);
-    const y1 = 100 + r1 * Math.sin(rad);
-    const x2 = 100 + r2 * Math.cos(rad);
-    const y2 = 100 + r2 * Math.sin(rad);
+    const x1 = (100 + r1 * Math.cos(rad)).toFixed(3);
+    const y1 = (100 + r1 * Math.sin(rad)).toFixed(3);
+    const x2 = (100 + r2 * Math.cos(rad)).toFixed(3);
+    const y2 = (100 + r2 * Math.sin(rad)).toFixed(3);
 
     const isActive = i < activeTicks;
     ticks.push({ x1, y1, x2, y2, isActive, index: i });

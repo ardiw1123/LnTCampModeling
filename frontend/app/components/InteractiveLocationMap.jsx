@@ -44,8 +44,8 @@ export default function InteractiveLocationMap({
   globalCountryFilter,
   isLoadingDashboard,
 }) {
-  const [svgText, setSvgText] = useState(getCachedWorldMapSvg);
-  const [isLoadingSvg, setIsLoadingSvg] = useState(!getCachedWorldMapSvg());
+  const [svgText, setSvgText] = useState(null);
+  const [isLoadingSvg, setIsLoadingSvg] = useState(true);
   const [svgError, setSvgError] = useState(null);
 
   const [countryStats, setCountryStats] = useState([]);
@@ -116,6 +116,13 @@ export default function InteractiveLocationMap({
   // Load world-map.svg asset
   useEffect(() => {
     let isMounted = true;
+
+    const cached = getCachedWorldMapSvg();
+    if (cached) {
+      setSvgText(cached);
+      setIsLoadingSvg(false);
+      return;
+    }
 
     fetchWorldMapSvg()
       .then((text) => {
@@ -568,6 +575,7 @@ export default function InteractiveLocationMap({
           ref={mapWrapRef}
           className="map-svg-wrap"
           id="mapSvgWrap"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={svgText ? { __html: svgText } : undefined}
         />
 
