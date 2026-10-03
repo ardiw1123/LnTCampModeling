@@ -16,12 +16,20 @@
   ],
   "rewrites": [
     {
-      "source": "/analytics-api/:path*",
-      "destination": "/analytics/app.py"
+      "source": "/analytics-api/(.*)",
+      "destination": "/api/$1"
     },
     {
-      "source": "/prediction-api/:path*",
+      "source": "/prediction-api/(.*)",
+      "destination": "/api/predict/$1"
+    },
+    {
+      "source": "/api/predict/(.*)",
       "destination": "/backend/app/main.py"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/analytics/app.py"
     },
     {
       "source": "/(.*)",

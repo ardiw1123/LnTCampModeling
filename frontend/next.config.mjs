@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
+    // If deployed on Vercel, we let vercel.json handle the routing to the Python serverless functions.
+    // Otherwise Next.js will try to proxy to 127.0.0.1 which fails with a 500 error on Vercel.
+    if (process.env.VERCEL) {
+      return [];
+    }
+
     const rawAnalyticsUrl =
       process.env.NEXT_PUBLIC_ANALYTICS_API_URL ||
       process.env.ANALYTICS_URL ||
