@@ -1,39 +1,39 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/next"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "nextjs"
     },
-    {
-      "src": "analytics/app.py",
-      "use": "@vercel/python"
+    "analytics": {
+      "root": "analytics/",
+      "framework": "fastapi",
+      "entrypoint": "app.py"
     },
-    {
-      "src": "backend/app/main.py",
-      "use": "@vercel/python"
+    "backend": {
+      "root": "backend/",
+      "framework": "fastapi",
+      "entrypoint": "app.main:app"
     }
-  ],
+  },
   "rewrites": [
     {
-      "source": "/analytics-api/(.*)",
-      "destination": "/api/$1"
+      "source": "/analytics-api/:path*",
+      "destination": {
+        "service": "analytics"
+      }
     },
     {
-      "source": "/prediction-api/(.*)",
-      "destination": "/api/predict/$1"
-    },
-    {
-      "source": "/api/predict/(.*)",
-      "destination": "/backend/app/main.py"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/analytics/app.py"
+      "source": "/prediction-api/:path*",
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/$1"
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }
