@@ -455,7 +455,7 @@ export default function PredictionView() {
             />
             <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-300">
               {healthStatus === "ok"
-                ? "Models Ready (Port 8000)"
+                ? "Models Ready"
                 : healthStatus === "degraded"
                 ? "Degraded (Check Models)"
                 : healthStatus === "checking"
@@ -1451,7 +1451,7 @@ export default function PredictionView() {
             )}
 
             <div className="pt-4 border-t border-purple-100/60 dark:border-purple-950/30 text-[11px] text-zinc-400 text-center">
-              Powered by local XGBoost models
+              Powered by XGBoost models
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Dropify Superstore Analytics Dashboard",
+  title: "Superstore Analytics Dashboard",
   description: "Enterprise analytics exploration dashboard, logistics intelligence, and AI risk prediction for Global Superstore dataset.",
 };
 
