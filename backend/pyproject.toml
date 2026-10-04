@@ -3,5 +3,16 @@ name = "ml-api"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2",
+    "pandas",
+    "numpy",
+    "joblib",
+    "scikit-learn==1.6.1",
+    "xgboost==3.0.2"
+]
+
 [tool.fastapi]
 entrypoint = "app.main:app"
