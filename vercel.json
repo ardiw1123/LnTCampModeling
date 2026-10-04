@@ -9,11 +9,6 @@
       "root": "analytics/",
       "framework": "fastapi",
       "entrypoint": "app.py"
-    },
-    "backend": {
-      "root": "backend/",
-      "framework": "fastapi",
-      "entrypoint": "app.main:app"
     }
   },
   "rewrites": [
@@ -21,12 +16,6 @@
       "source": "/analytics-api/:path*",
       "destination": {
         "service": "analytics"
-      }
-    },
-    {
-      "source": "/prediction-api/:path*",
-      "destination": {
-        "service": "backend"
       }
     },
     {
