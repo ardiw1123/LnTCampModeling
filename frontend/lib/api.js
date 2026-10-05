@@ -41,7 +41,7 @@ function isLocalHost() {
  */
 async function fetchAnalytics(endpoint, queryParams = {}) {
   const query = buildQueryString(queryParams);
-  const primaryUrl = `/analytics-api${endpoint}`;
+  const primaryUrl = `/analytics-api${endpoint}${query}`;
   const directBase = ANALYTICS_BASE_URL.replace(/\/+$/, "").replace(/\/api$/, "");
   const directUrl = `${directBase}/api${endpoint}${query}`;
 

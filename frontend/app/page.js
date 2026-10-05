@@ -23,6 +23,7 @@ import PredictionView from "./components/PredictionView";
 import EmptyState from "./components/EmptyState";
 import ErrorState from "./components/ErrorState";
 import { getDashboardSummary, getDateBounds, getCountries } from "@/lib/api";
+import { SUPERSTORE_COUNTRIES } from "@/lib/superstoreCountries";
 import {
   ShoppingBag,
   Truck,
@@ -126,6 +127,17 @@ export default function Home() {
     loadDashboard();
   }, [loadDashboard, filters]);
 
+  // Synchronize selectedLocation with global country filter if single country is active
+  useEffect(() => {
+    if (filters.country) {
+      const activeCountries = Array.isArray(filters.country) ? filters.country : [filters.country];
+      if (activeCountries.length === 1 && selectedLocation !== activeCountries[0]) {
+        setSelectedLocation(activeCountries[0]);
+        setSelectedLocationMeta(SUPERSTORE_COUNTRIES[activeCountries[0]] || null);
+      }
+    }
+  }, [filters.country, selectedLocation]);
+
   const handleSelectLocation = (locationName, meta) => {
     setSelectedLocation(locationName);
     setSelectedLocationMeta(meta);
@@ -137,9 +149,21 @@ export default function Home() {
   };
 
   const handleApplyLocationFilter = (countryName) => {
+    setFilters((prev) => {
+      const isAlready = Array.isArray(prev.country)
+        ? prev.country.includes(countryName)
+        : prev.country === countryName;
+      return {
+        ...prev,
+        country: isAlready ? undefined : [countryName],
+      };
+    });
+  };
+
+  const handleDateFilterChange = (dateUpdates) => {
     setFilters((prev) => ({
       ...prev,
-      country: [countryName],
+      ...dateUpdates,
     }));
   };
 
@@ -246,6 +270,42 @@ export default function Home() {
                 onResetFilters={handleResetFilters}
                 isLoading={isLoading}
               />
+            </div>
+          )}
+
+          {/* Active Filter Strip (visible when filters are active and FilterBar is closed) */}
+          {hasActiveFilters && !showFilterBar && (
+            <div className="my-3 flex items-center justify-between gap-3 px-4 py-2 rounded-2xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-900/50 text-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="flex h-2 w-2 rounded-full bg-[#7C69EF] shrink-0" />
+                <span className="font-bold text-zinc-900 dark:text-white">Active Scope:</span>
+                {filters.date_start && filters.date_end && (filters.date_start !== dateBounds?.min_date || filters.date_end !== dateBounds?.max_date) && (
+                  <span className="px-2.5 py-0.5 rounded-lg bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-semibold">
+                    {filters.date_start === filters.date_end ? `Day: ${filters.date_start}` : `${filters.date_start} → ${filters.date_end}`}
+                  </span>
+                )}
+                {filters.country && (
+                  <span className="px-2.5 py-0.5 rounded-lg bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-semibold">
+                    Country: {Array.isArray(filters.country) ? filters.country.join(", ") : filters.country}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowFilterBar(true)}
+                  className="text-xs font-semibold text-[#7C69EF] hover:underline"
+                >
+                  Adjust Filters
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100"
+                >
+                  Reset Scope
+                </button>
+              </div>
             </div>
           )}
 
@@ -423,6 +483,16 @@ export default function Home() {
                         dateFilters={filters}
                         globalCountryFilter={filters.country}
                         isLoadingDashboard={isLoading}
+                        onApplyAsFilter={handleApplyLocationFilter}
+                        isFilteredByThisLocation={
+                          Boolean(
+                            selectedLocation &&
+                              filters.country &&
+                              (Array.isArray(filters.country)
+                                ? filters.country.includes(selectedLocation)
+                                : filters.country === selectedLocation)
+                          )
+                        }
                       />
                     </div>
                     <div className="lg:col-span-5 xl:col-span-4">
@@ -434,6 +504,7 @@ export default function Home() {
                         onClearSelection={handleClearLocation}
                         onApplyAsFilter={handleApplyLocationFilter}
                         onSelectLocation={handleSelectLocation}
+                        onDateFilterChange={handleDateFilterChange}
                         isFilteredByThisLocation={
                           Boolean(
                             selectedLocation &&
@@ -524,11 +595,14 @@ export default function Home() {
               </button>
             </div>
 
-            <form onSubmit={handleSearchSubmit} className="mt-4 space-y-4">
+            <form onSubmit={handleSearchSubmit} className="mt-4 space-y-3">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Search across 51,290 records. Matches <strong>Order ID</strong> (e.g. CA-2014-...), <strong>Customer Name</strong>, <strong>Product Name</strong>, or <strong>Country</strong>.
+              </p>
               <input
                 type="text"
                 autoFocus
-                placeholder="Search by order ID, customer name, product, city..."
+                placeholder="Search by Order ID, Customer Name, Product, or Country..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-800 border border-purple-100 dark:border-purple-950/40 px-4 py-2.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 focus:border-[#7C69EF] focus:outline-none"

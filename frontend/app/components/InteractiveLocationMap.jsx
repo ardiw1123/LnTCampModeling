@@ -17,6 +17,7 @@ import {
   MousePointer,
   Filter,
   CheckCircle2,
+  X,
 } from "lucide-react";
 import { SUPERSTORE_COUNTRIES } from "@/lib/superstoreCountries";
 import { getCountryStats } from "@/lib/api";
@@ -43,6 +44,8 @@ export default function InteractiveLocationMap({
   dateFilters,
   globalCountryFilter,
   isLoadingDashboard,
+  onApplyAsFilter,
+  isFilteredByThisLocation,
 }) {
   const [svgText, setSvgText] = useState(null);
   const [isLoadingSvg, setIsLoadingSvg] = useState(true);
@@ -460,10 +463,10 @@ export default function InteractiveLocationMap({
         {/* Toolbar Actions: Quick Country Selector + Zoom/Reset Controls */}
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           {/* Quick Country Dropdown Selector */}
-          <div className="relative min-w-[200px] flex-1 sm:flex-none">
+          <div className="relative min-w-[200px] flex-1 sm:flex-none flex items-center gap-1.5">
             <select
               id="mapCountrySelect"
-              value={selectedLocation || ""}
+              value={selectedLocation || (Array.isArray(globalCountryFilter) ? globalCountryFilter[0] : globalCountryFilter) || ""}
               onChange={(e) => handleDropdownChange(e.target.value)}
               aria-label="Select Country"
               className="w-full rounded-xl border border-purple-100/80 dark:border-purple-950/60 bg-zinc-50 dark:bg-[#201D33] px-3 py-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#7C69EF] cursor-pointer"
@@ -478,6 +481,17 @@ export default function InteractiveLocationMap({
                 );
               })}
             </select>
+            {selectedLocation && (
+              <button
+                type="button"
+                onClick={() => handleDropdownChange("")}
+                title="Clear country selection"
+                aria-label="Clear country selection"
+                className="p-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Zoom and Pan Reset Controls */}
@@ -513,6 +527,54 @@ export default function InteractiveLocationMap({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Scope and selection banner */}
+      <div className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 my-2.5 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-100/80 dark:border-purple-900/40 text-xs">
+        <div className="flex items-center gap-2">
+          <Info className="h-3.5 w-3.5 text-[#7C69EF] shrink-0" />
+          {isFilteredByThisLocation ? (
+            <span className="text-purple-900 dark:text-purple-200">
+              <strong>Dashboard Filter Active:</strong> All views &amp; orders are filtered to <strong>{selectedLocation}</strong>. Other countries dimmed.
+            </span>
+          ) : globalCountryFilter && (Array.isArray(globalCountryFilter) ? globalCountryFilter.length > 0 : Boolean(globalCountryFilter)) ? (
+            <span className="text-purple-900 dark:text-purple-200">
+              <strong>Dashboard Filter Active:</strong> Highlighting {Array.isArray(globalCountryFilter) ? globalCountryFilter.join(", ") : globalCountryFilter}. Other countries dimmed.
+            </span>
+          ) : selectedLocation ? (
+            <span className="text-purple-900 dark:text-purple-200">
+              <strong>Local Inspection:</strong> Viewing <strong>{selectedLocation}</strong> in side panel. Dashboard remains on global scope.
+            </span>
+          ) : (
+            <span className="text-zinc-600 dark:text-zinc-400">
+              Click any country on the map or dropdown to inspect localized metrics in the side panel.
+            </span>
+          )}
+        </div>
+        {selectedLocation && (
+          <div className="flex items-center gap-2">
+            {onApplyAsFilter && (
+              <button
+                type="button"
+                onClick={() => onApplyAsFilter(selectedLocation)}
+                className={`rounded-xl px-2.5 py-1 text-xs font-semibold transition-all ${
+                  isFilteredByThisLocation
+                    ? "bg-[#7C69EF] text-white shadow-xs hover:bg-[#6D58E2]"
+                    : "border border-purple-200 dark:border-purple-800 bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 hover:bg-purple-200"
+                }`}
+              >
+                {isFilteredByThisLocation ? "Remove Global Filter" : "Filter Whole Dashboard"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => handleDropdownChange("")}
+              className="text-[11px] font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+            >
+              Clear inspection
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Region Jump Toolbar */}

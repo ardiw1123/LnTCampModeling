@@ -178,6 +178,21 @@ export default function FilterBar({
 
   return (
     <div className="w-full rounded-3xl border border-purple-100/80 dark:border-purple-950/40 bg-white/90 dark:bg-[#201D33]/90 p-4 sm:p-5 shadow-sm backdrop-blur-md">
+      {/* Scope banner explaining what these filters affect */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-purple-100/60 dark:border-purple-950/30 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2 w-2 rounded-full bg-[#7C69EF]" />
+          <span className="font-bold text-zinc-900 dark:text-white">Global Scope Filters</span>
+          <span className="text-zinc-400 hidden sm:inline">&middot;</span>
+          <span className="text-zinc-500 dark:text-zinc-400">
+            Narrows all dashboard KPI cards, trend charts, category distributions, map activity, and exploration records
+          </span>
+        </div>
+        <div className="text-[11px] font-medium text-purple-700 dark:text-purple-300">
+          {hasActiveFilters ? "Active Filters Applied" : "All Time • 147 Countries"}
+        </div>
+      </div>
+
       {/* Top row: controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Left: Date Filtering (Range or Single Day) */}
